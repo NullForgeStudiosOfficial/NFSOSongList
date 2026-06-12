@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <title>NFSO Song Search</title>
 
 <style>
+
 body {
     background: #1a1d21;
     color: #e6e6e6;
@@ -20,6 +20,12 @@ body {
 
 .Header h1 {
     margin: 0;
+}
+
+#songcount {
+    color: #9aa0aa;
+    margin-top: 8px;
+    font-size: 14px;
 }
 
 .SearchBar {
@@ -65,57 +71,166 @@ input:focus {
 
 .artist {
     color: #b0b0b0;
+    margin-top: 4px;
 }
 
-.genre {
+.info {
     color: #8f8f8f;
     font-size: 13px;
-    margin-top: 5px;
+    margin-top: 6px;
 }
+
 </style>
 </head>
 
 <body>
 
 <div class="Header">
-    <h1>🎸 NFSO Song Search</h1>
+    <h1>🥁 NFSO Song Search 🥁</h1>
+    <div id="songcount">Loading...</div>
 </div>
 
 <div class="SearchBar">
-    <input id="search" placeholder="Search Artist, Song, Genre, Charter...">
+    <input
+        id="search"
+        placeholder="Search Song, Artist, or Genre..."
+    >
 </div>
 
 <div id="results"></div>
 
 <script>
+
 let Songs = [];
+let FilteredSongs = [];
+
+const SongsPerLoad = 100;
+
+let CurrentIndex = 0;
+let IsLoading = false;
+
+function FormatLength(songlength)
+{
+    const TotalSeconds = Math.floor(songlength / 1000);
+
+    const Minutes = Math.floor(TotalSeconds / 60);
+    const Seconds = (TotalSeconds % 60)
+        .toString()
+        .padStart(2, "0");
+
+    return `${Minutes}:${Seconds}`;
+}
+
+function BuildSongCard(song)
+{
+    return `
+        <div class="song">
+
+            <div class="songname">
+                ${song.Name || "Unknown Song"}
+            </div>
+
+            <div class="artist">
+                ${song.Artist || "Unknown Artist"}
+            </div>
+
+            <div class="info">
+                ${song.Genre || "Unknown Genre"}
+                •
+                ${FormatLength(song.songlength)}
+            </div>
+
+        </div>
+    `;
+}
+
+function LoadMoreSongs()
+{
+    if (IsLoading)
+        return;
+
+    if (CurrentIndex >= FilteredSongs.length)
+        return;
+
+    IsLoading = true;
+
+    const ResultsDiv =
+        document.getElementById("results");
+
+    const NextSongs =
+        FilteredSongs.slice(
+            CurrentIndex,
+            CurrentIndex + SongsPerLoad
+        );
+
+    ResultsDiv.innerHTML +=
+        NextSongs.map(BuildSongCard).join("");
+
+    CurrentIndex += SongsPerLoad;
+
+    IsLoading = false;
+}
+
+function SearchSongs(SearchText = "")
+{
+    SearchText =
+        SearchText.toLowerCase().trim();
+
+    if (SearchText === "")
+    {
+        FilteredSongs = Songs;
+    }
+    else
+    {
+        FilteredSongs = Songs.filter(song =>
+        {
+            return (
+                song.Name?.toLowerCase().includes(SearchText) ||
+                song.Artist?.toLowerCase().includes(SearchText) ||
+                song.Genre?.toLowerCase().includes(SearchText)
+            );
+        });
+    }
+
+    CurrentIndex = 0;
+
+    document.getElementById("results").innerHTML = "";
+
+    LoadMoreSongs();
+}
+
+window.addEventListener("scroll", () =>
+{
+    if (
+        window.innerHeight +
+        window.scrollY
+        >=
+        document.body.offsetHeight - 500
+    )
+    {
+        LoadMoreSongs();
+    }
+});
 
 fetch("songs.json")
-.then(r => r.json())
-.then(data => {
+.then(response => response.json())
+.then(data =>
+{
     Songs = data;
+
+    document.getElementById("songcount").innerText =
+        `${Songs.length.toLocaleString()} Songs`;
+
+    SearchSongs();
 });
 
-document.getElementById("search").addEventListener("input", e => {
-
-    const Search = e.target.value.toLowerCase();
-
-    const Results = Songs.filter(song =>
-        JSON.stringify(song).toLowerCase().includes(Search)
-    );
-
-    document.getElementById("results").innerHTML =
-        Results.slice(0,250).map(song => `
-            <div class="song">
-                <div class="songname">${song.name || "Unknown Song"}</div>
-                <div class="artist">${song.artist || "Unknown Artist"}</div>
-                <div class="genre">
-                    ${song.genre || ""}
-                    ${song.charter ? " • " + song.charter : ""}
-                </div>
-            </div>
-        `).join("");
+document
+.getElementById("search")
+.addEventListener("input", e =>
+{
+    SearchSongs(e.target.value);
 });
+
 </script>
 
 </body>
