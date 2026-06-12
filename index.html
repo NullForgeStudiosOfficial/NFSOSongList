@@ -93,6 +93,7 @@ input:focus {
 
 <div class="Header">
     <h1>🥁 NFSO Song Search 🥁</h1>
+    <div><p>Ouvert didn't work so... I made my own website, with blackjack♦️, and hookers💃.</p></div>
     <div id="songcount">Loading...</div>
 </div>
 
@@ -223,6 +224,20 @@ fetch("songs.json")
 .then(data =>
 {
     Songs = data;
+
+    document.getElementById("songcount").innerText =
+        `${Songs.length.toLocaleString()} Songs`;
+
+    Songs.sort((a, b) =>
+    {
+        const ArtistCompare =
+            (a.Artist || "").localeCompare(b.Artist || "");
+
+        if (ArtistCompare !== 0)
+            return ArtistCompare;
+
+        return (a.Name || "").localeCompare(b.Name || "");
+    });
 
     document.getElementById("songcount").innerText =
         `${Songs.length.toLocaleString()} Songs`;
