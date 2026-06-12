@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>NFSO Song Search</title>
+
+<style>
+body {
+    background: #1a1d21;
+    color: #e6e6e6;
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+.Header {
+    background: #242830;
+    padding: 20px;
+    border-bottom: 1px solid #3a3f4b;
+}
+
+.Header h1 {
+    margin: 0;
+}
+
+.SearchBar {
+    padding: 20px;
+}
+
+input {
+    width: 100%;
+    box-sizing: border-box;
+    background: #2c313c;
+    color: white;
+    border: 1px solid #4d5360;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 18px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #7c4dff;
+}
+
+#results {
+    padding: 0 20px 20px 20px;
+}
+
+.song {
+    background: #242830;
+    border: 1px solid #3a3f4b;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    padding: 12px;
+}
+
+.song:hover {
+    background: #2c313c;
+}
+
+.songname {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.artist {
+    color: #b0b0b0;
+}
+
+.genre {
+    color: #8f8f8f;
+    font-size: 13px;
+    margin-top: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="Header">
+    <h1>🎸 NFSO Song Search</h1>
+</div>
+
+<div class="SearchBar">
+    <input id="search" placeholder="Search Artist, Song, Genre, Charter...">
+</div>
+
+<div id="results"></div>
+
+<script>
+let Songs = [];
+
+fetch("songs.json")
+.then(r => r.json())
+.then(data => {
+    Songs = data;
+});
+
+document.getElementById("search").addEventListener("input", e => {
+
+    const Search = e.target.value.toLowerCase();
+
+    const Results = Songs.filter(song =>
+        JSON.stringify(song).toLowerCase().includes(Search)
+    );
+
+    document.getElementById("results").innerHTML =
+        Results.slice(0,250).map(song => `
+            <div class="song">
+                <div class="songname">${song.name || "Unknown Song"}</div>
+                <div class="artist">${song.artist || "Unknown Artist"}</div>
+                <div class="genre">
+                    ${song.genre || ""}
+                    ${song.charter ? " • " + song.charter : ""}
+                </div>
+            </div>
+        `).join("");
+});
+</script>
+
+</body>
+</html>
