@@ -50,34 +50,40 @@ input:focus {
 
 #results {
     padding: 0 20px 20px 20px;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 10px;
 }
 
 .song {
     background: #242830;
     border: 1px solid #3a3f4b;
     border-radius: 8px;
-    margin-bottom: 10px;
     padding: 12px;
+
+    transition: 0.15s;
 }
 
 .song:hover {
     background: #2c313c;
+    transform: translateY(-2px);
 }
 
 .songname {
     font-size: 18px;
     font-weight: bold;
+    margin-bottom: 4px;
 }
 
 .artist {
     color: #b0b0b0;
-    margin-top: 4px;
+    margin-bottom: 6px;
 }
 
 .info {
     color: #8f8f8f;
     font-size: 13px;
-    margin-top: 6px;
 }
 
 </style>
